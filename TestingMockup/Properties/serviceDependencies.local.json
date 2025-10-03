@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "identityapp1": {
+      "connectionInfo": "App registration: Jason, Tenant: University of Puerto Rico (upr.edu - Microsoft Entra ID)",
+      "type": "identityapp.default"
+    }
+  }
+}

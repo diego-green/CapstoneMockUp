@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    // Build return URL so user comes back to the same page after login/logout
+    var here = Context?.Request?.Path + Context?.Request?.QueryString;
+}
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <form asp-page="/Account/SignOut"
+          asp-route-returnUrl="@here"
+          method="get"
+          class="auth-form">
+        <span>
+            Hello,
+            @(
+                    User.FindFirst("given_name")?.Value
+                    ?? User.FindFirst("name")?.Value
+                    ?? User.Identity?.Name
+                    )!
+    </span>
+    <button type="submit" class="btn-link">Sign out</button>
+</form>
+}
+else
+{
+    <a asp-page="/Account/SignIn"
+       asp-route-returnUrl="@here"
+       class="btn-link">Sign in</a>
+}

@@ -1,0 +1,21 @@
+﻿@page
+@model TestingMockup.Pages.Project.EditAddModel
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@{
+    ViewData["Title"] = "Edit/Add Project";
+}
+<h2>Edit/Add Project</h2>
+
+
+<form method="post">
+    <div class="mb-3">
+        <label for="Title" class="form-label">Title</label>
+        <input id="Title" name="Title" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label for="Description" class="form-label">Description</label>
+        <textarea id="Description" name="Description" rows="4" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-page="/Dashboard" class="btn btn-secondary">Cancel</a>
+</form>
