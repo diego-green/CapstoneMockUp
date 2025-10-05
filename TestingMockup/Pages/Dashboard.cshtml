@@ -5,200 +5,168 @@
     <h2 class="h2">Home Dashboard</h2>
 
     <section class="grid">
-        <div class="card p-4 position-relative" style="width:100%;">
-            <div class="card-inner text-center">
-                <div class="chip">Honeywell Project 1</div>
+        <!-- MAIN PROJECT CARD -->
+        <fluent-card class="project-card" appearance="filled" elevation="3">
+            <div class="project-card__header">
+                <div class="project-name-inner">
+                    @{
+                        var title = (Model.Projects?.FirstOrDefault(p => p.Id == Model.ProjectId)?.Name)
+                        ?? Model.Projects?.FirstOrDefault()?.Name
+                        ?? "No Project Selected";
+                    }
+                    @title
+                </div>
 
-                <!-- Upload PDF -->
-                <form method="post"
-                      enctype="multipart/form-data"
-                      asp-page-handler="UploadPdf"
-                      class="mt-3 d-flex gap-2 justify-content-center flex-wrap">
-                    <input type="file" name="pdfFile" accept=".pdf"
-                           class="form-control" style="max-width:420px" required />
-                    <button type="submit" class="btn btn-primary">Upload PDF</button>
-                </form>
-                <small class="text-muted d-block mt-1">
-                    Upload a PDF. We’ll convert each page to an image and auto-play the slides.
-                </small>
-
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-warning mt-3 text-start">
-                        @foreach (var kv in ViewData.ModelState)
+                <form method="get" class="filter-row">
+                    <label class="form-label">Filter by project</label>
+                    <fluent-select name="ProjectId" onchange="this.form.submit()">
+                        @if (Model.Projects?.Count > 0)
                         {
-                            foreach (var err in kv.Value.Errors)
+                            foreach (var p in Model.Projects)
                             {
-                                <div>@err.ErrorMessage</div>
+                                <fluent-option value="@p.Id" selected="@(p.Id == Model.ProjectId)">@p.Name</fluent-option>
                             }
                         }
-                    </div>
-                }
-
-                <!-- Slideshow (from converted PNGs) -->
-                @if (Model.SlideUrls?.Count > 0)
-                {
-                    <div class="mt-3" style="width:100%; max-width:1100px; margin:0 auto;">
-                        <div id="slideShell" class="slide-shell">
-                            <img id="slideImg" alt="Slide" />
-                            <div class="controls">
-                                <button type="button" class="btn btn-sm btn-light" id="prevBtn">Prev</button>
-                                <button type="button" class="btn btn-sm btn-light" id="playPauseBtn">Pause</button>
-                                <button type="button" class="btn btn-sm btn-light" id="nextBtn">Next</button>
-                                <span id="pageLabel" class="badge bg-dark ms-2">1 / @Model.SlideUrls.Count</span>
-                                <span class="ms-3 text-light">Interval</span>
-                                <input type="number" id="intervalInput" min="1" value="4" class="form-control form-control-sm" style="width:70px" />
-                                <span class="text-light">sec</span>
-                                <button type="button" class="btn btn-sm btn-outline-light ms-3" id="fullscreenBtn" title="Full screen">⤢</button>
-                            </div>
-                        </div>
-
-                        <style>
-                            .slide-shell {
-                                position: relative;
-                                background: #000;
-                                border-radius: 14px;
-                                overflow: hidden;
-                                box-shadow: 0 8px 30px rgba(0,0,0,.35);
-                            }
-
-                            #slideImg {
-                                width: 100%;
-                                height: 75vh;
-                                object-fit: contain; /* keeps aspect ratio, letterboxes horizontally like PPT */
-                                background: #000;
-                                display: block;
-                            }
-
-                            .controls {
-                                position: absolute;
-                                right: 12px;
-                                bottom: 12px;
-                                display: flex;
-                                align-items: center;
-                                gap: 8px;
-                                padding: 6px 10px;
-                                background: rgba(0,0,0,.35);
-                                border-radius: 999px;
-                                color: #fff;
-                                backdrop-filter: blur(2px);
-                            }
-                        </style>
-
-                        <script>
-                            (function () {
-                                const slides = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SlideUrls));
-                                let idx = 0;
-                                let playing = true;
-                                let timer = null;
-
-                                const img = document.getElementById("slideImg");
-                                const pageLabel = document.getElementById("pageLabel");
-                                const prevBtn = document.getElementById("prevBtn");
-                                const nextBtn = document.getElementById("nextBtn");
-                                const playPauseBtn = document.getElementById("playPauseBtn");
-                                const intervalInput = document.getElementById("intervalInput");
-                                const fullscreenBtn = document.getElementById("fullscreenBtn");
-                                const shell = document.getElementById("slideShell");
-
-                                function show(i) {
-                                    idx = (i + slides.length) % slides.length;
-                                    img.src = slides[idx];
-                                    pageLabel.textContent = (idx + 1) + " / " + slides.length;
-                                }
-
-                                function start() {
-                                    stop();
-                                    const ms = Math.max(1000, parseInt(intervalInput.value || "4") * 1000);
-                                    timer = setInterval(() => show(idx + 1), ms);
-                                }
-                                function stop() { if (timer) clearInterval(timer); timer = null; }
-
-                                prevBtn.addEventListener("click", () => { stop(); show(idx - 1); if (playing) start(); });
-                                nextBtn.addEventListener("click", () => { stop(); show(idx + 1); if (playing) start(); });
-                                playPauseBtn.addEventListener("click", () => {
-                                    playing = !playing;
-                                    playPauseBtn.textContent = playing ? "Pause" : "Play";
-                                    if (playing) start(); else stop();
-                                });
-                                intervalInput.addEventListener("change", () => { if (playing) start(); });
-
-                                // Fullscreen
-                                fullscreenBtn.addEventListener("click", () => {
-                                    if (!document.fullscreenElement) shell.requestFullscreen?.();
-                                    else document.exitFullscreen?.();
-                                });
-
-                                // Keyboard shortcuts
-                                window.addEventListener("keydown", (e) => {
-                                    if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
-                                    if (e.key === "ArrowLeft") { e.preventDefault(); prevBtn.click(); }
-                                    if (e.key === "ArrowRight") { e.preventDefault(); nextBtn.click(); }
-                                    if (e.key === " " || e.code === "Space") { e.preventDefault(); playPauseBtn.click(); }
-                                });
-
-                                // Init
-                                show(0);
-                                start();
-                            })();
-                        </script>
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted mt-3">No slides yet. Upload a PDF above.</p>
-                }
+                        else
+                        {
+                            <fluent-option value="">(none yet)</fluent-option>
+                        }
+                    </fluent-select>
+                    <noscript><button type="submit">Apply</button></noscript>
+                </form>
             </div>
-        </div>
-        <div class="right-col">
 
-            <!-- Announcement -->
-            <div class="card"
-                 hx-get="/Dashboard/AnnouncementsPartial"
-                 hx-trigger="load"
-                 hx-swap="innerHTML">
-                <div class="card-inner">
-                    <h3>Announcement Board</h3>
+            @if (User?.Identity?.IsAuthenticated ?? false)
+            {
+                <form method="post" enctype="multipart/form-data" asp-page-handler="UploadPdf" class="upload-row">
+                    <div class="field">
+                        <label class="form-label">Upload PDF to project</label>
+                        <fluent-select name="projectId">
+                            @if (Model.Projects?.Count > 0)
+                            {
+                                foreach (var p in Model.Projects)
+                                {
+                                    <fluent-option value="@p.Id" selected="@(p.Id == Model.ProjectId)">@p.Name</fluent-option>
+                                }
+                            }
+                            else
+                            {
+                                <fluent-option value="DefaultProject" selected="true">DefaultProject</fluent-option>
+                            }
+                        </fluent-select>
+                    </div>
+
+                    <div class="field">
+                        <label class="form-label">Create new project</label>
+                        <fluent-text-field name="newProjectName" placeholder="e.g., Honeywell-Project-Name"></fluent-text-field>
+                    </div>
+
+                    <div class="field">
+                        <label class="form-label">PDF file selector</label>
+                        <div class="file-picker">
+                            <fluent-button appearance="accent" type="button" onclick="document.getElementById('pdfFile').click()">Select PDF</fluent-button>
+                            <span id="fileName" class="file-name">No file selected</span>
+                            <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required hidden
+                                   onchange="document.getElementById('fileName').textContent = this.files.length ? this.files[0].name : 'No file selected';">
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <fluent-button appearance="accent" type="submit" class="action-btn">Upload</fluent-button>
+                    </div>
+                </form>
+
+            }
+
+            @if (Model.SlideUrls?.Count > 0)
+            {
+                <div class="project-card__show">
+                    <div id="slideShell" class="slide-shell">
+                        <img id="slideImg" class="slide-img" alt="Slide" />
+                        <div class="slide-controls">
+                            <fluent-button id="prevBtn" appearance="secondary" size="small">Prev</fluent-button>
+                            <fluent-button id="playPauseBtn" appearance="secondary" size="small">Pause</fluent-button>
+                            <fluent-button id="nextBtn" appearance="secondary" size="small">Next</fluent-button>
+                            <span id="pageLabel" class="page-chip">1 / @Model.SlideUrls.Count</span>
+                            <span>Interval</span>
+                            <fluent-number-field id="intervalInput" min="1" value="4" style="width:80px;"></fluent-number-field>
+                            <span>sec</span>
+                            <fluent-button id="fullscreenBtn" appearance="secondary" size="small" title="Full screen">⤢</fluent-button>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    (function () {
+                      const slides = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.SlideUrls));
+                      let idx = 0, playing = true, timer = null;
+
+                      const img = document.getElementById("slideImg");
+                      const shell = document.getElementById("slideShell");
+                      const pageLabel = document.getElementById("pageLabel");
+                      const prevBtn = document.getElementById("prevBtn");
+                      const nextBtn = document.getElementById("nextBtn");
+                      const playPauseBtn = document.getElementById("playPauseBtn");
+                      const intervalInput = document.getElementById("intervalInput");
+                      const fullscreenBtn = document.getElementById("fullscreenBtn");
+
+                      function show(i){ idx = (i + slides.length) % slides.length; img.src = slides[idx]; pageLabel.textContent = (idx+1)+" / "+slides.length; }
+                      function start(){ stop(); const ms = Math.max(1000, parseInt(intervalInput.value || "4") * 1000); timer = setInterval(() => show(idx+1), ms); }
+                      function stop(){ if (timer) clearInterval(timer); timer = null; }
+
+                      prevBtn.addEventListener("click",()=>{ stop(); show(idx-1); if(playing) start(); });
+                      nextBtn.addEventListener("click",()=>{ stop(); show(idx+1); if(playing) start(); });
+                      playPauseBtn.addEventListener("click",()=>{ playing=!playing; playPauseBtn.textContent=playing?"Pause":"Play"; if(playing) start(); else stop(); });
+                      intervalInput.addEventListener("change",()=>{ if(playing) start(); });
+
+                      fullscreenBtn.addEventListener("click",()=>{ if(!document.fullscreenElement) shell.requestFullscreen?.(); else document.exitFullscreen?.(); });
+
+                      show(0); start();
+                    })();
+                </script>
+            }
+            else
+            {
+                <div class="project-card__show">
+                    <p class="text-muted">Upload a PDF for this project to generate slides.</p>
+                </div>
+            }
+        </fluent-card>
+
+        <!-- RIGHT COLUMN -->
+        <div class="right-col">
+            <fluent-card hx-get="/Dashboard/AnnouncementsPartial" hx-trigger="load" hx-swap="innerHTML" style="position:relative;">
+                <div>
+                    <h3 style="margin-top:0;">Announcement Board</h3>
                     @if (User?.Identity?.IsAuthenticated ?? false)
                     {
-                        <form method="get" asp-page="/Edit-Add-Announcement"
-                              class="position-absolute" style="top:10px; right:10px;">
-                            <button type="submit" class="btn btn-sm btn-light rounded-pill">
-                                Edit/Add
-                            </button>
+                        <form method="get" asp-page="/Edit-Add-Announcement" style="position:absolute; top:10px; right:10px;">
+                            <fluent-button appearance="secondary" size="small" type="submit">Edit/Add</fluent-button>
                         </form>
                     }
                     @if (Model.LatestAnnouncement != null)
                     {
-                        <div class="mt-3 text-start">
+                        <div style="margin-top:10px; text-align:left;">
                             <strong>@User.Identity.Name</strong>
-                            <p>@Model.LatestAnnouncement</p>
+                            <p style="margin:6px 0 0 0;">@Model.LatestAnnouncement</p>
                         </div>
                     }
                 </div>
-            </div>
+            </fluent-card>
 
-            <!-- Temperature -->
-            <div class="card metric"
-                 hx-get="/Dashboard/TemperaturePartial"
-                 hx-trigger="load, every 10s"
-                 hx-swap="innerHTML">
-                <div class="card-inner metric-inner">
+            <fluent-card class="metric" hx-get="/Dashboard/TemperaturePartial" hx-trigger="load, every 10s" hx-swap="innerHTML" style="padding:0;">
+                <div class="metric-inner" style="padding:12px;">
                     <div class="metric-title">T: -- °C</div>
                     <div class="bar"><div class="bar-fill" style="width:0%"></div></div>
                 </div>
-            </div>
+            </fluent-card>
 
-            <!-- Humidity -->
-            <div class="card metric"
-                 hx-get="/Dashboard/HumidityPartial"
-                 hx-trigger="load, every 10s"
-                 hx-swap="innerHTML">
-                <div class="card-inner metric-inner">
+            <fluent-card class="metric" hx-get="/Dashboard/HumidityPartial" hx-trigger="load, every 10s" hx-swap="innerHTML" style="padding:0;">
+                <div class="metric-inner" style="padding:12px;">
                     <div class="metric-title">RH: --%</div>
                     <div class="bar bar-danger"><div class="bar-fill" style="width:0%"></div></div>
                 </div>
-            </div>
+            </fluent-card>
         </div>
     </section>
 </main>
