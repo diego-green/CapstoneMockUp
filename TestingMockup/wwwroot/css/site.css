@@ -1,12 +1,15 @@
-/* ============================================================
+﻿/* ============================================================
    0) DESIGN TOKENS / GLOBAL VARIABLES
    ============================================================ */
 :root {
+    /* App palette */
     --bg: #e9edf2;
     --topbar: #d9dbdf;
-    --rail: #2f3236;
-    --rail-btn: #3a3d42;
-    --accent: #8a1f11;
+    --accent: #8a1f11; /* keep as general accent if needed */
+    --brand-card-bg: #8a1f11; /* red for the logo card only */
+    --rail-btn-bg: #222; /* neutral for rail buttons */
+    --rail-btn-bg-hover: #2c2c2c;
+    --rail-btn-danger: #a00;
     --card: #232528;
     --card-edge: #b9bcc0;
     --ink: #0b0c0e;
@@ -14,15 +17,14 @@
     --ok: #7fb56b;
     --warn: #e6d34a;
     --danger: #9e2921;
-    --white: #ffffff;
-    --shadow: 0 2px 10px rgba(0, 0, 0, .15);
+    --background-inner: #808080;
+    /* Layout / effects */
+    --shadow: 0 2px 10px rgba(0,0,0,.15);
     --radius: 16px;
     --radius-lg: 22px;
     --radius-xl: 28px;
     --gap: 20px;
     --rail-w: 56px;
-    --content-pad: 1rem;
-    --background-inner: #808080;
     font-synthesis-weight: none;
 }
 
@@ -30,134 +32,173 @@
    1) BASE & RESETS
    ============================================================ */
 * {
-    box-sizing: border-box;
+    box-sizing: border-box
 }
 
 html, body {
-    height: 100%;
+    height: 100%
 }
 
 body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font: 500 16px/1.5 system-ui, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    font: 500 16px/1.5 system-ui, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
 }
 
 /* ============================================================
-   2) TOP BAR
-   ============================================================ */
-.topbar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    display: grid;
-    grid-template-columns: 320px 1fr 320px;
-    align-items: center;
-    height: 72px;
-    background: var(--topbar);
-    border-bottom: 1px solid #c7c9cc;
-    padding: 0 16px;
-}
-
-.brand-card {
-    background: var(--accent); /* red color */
-    padding: 6px 10px;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
-    display: inline-flex;
-    align-items: center;
-    height: 64px; /* fits your topbar */
-    width: 150px;
-}
-
-.brand-group {
-    display: flex;
-    align-items: center;
-    gap: 1px;
-}
-
-.brand-logo {
-    height: 60px;
-    width: auto;
-    border-radius: 6px;
-}
-
-.brand-vista {
-    font-weight: 800;
-    font-size: 1.3rem;
-    letter-spacing: 0.8px;
-    color: black;
-    margin-top: 2px; /* fine vertical alignment */
-}
-
-.topbar-title {
-    text-align: center;
-    font-weight: 700;
-    font-size: 22px;
-}
-
-.topbar-auth {
-    justify-self: end;
-}
-
-/* ============================================================
-   3) LEFT RAIL
+   2) LEFT RAIL (buttons + icons + offcanvas fixes)
    ============================================================ */
 .page-rail {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 56px;
+    inset: 0 auto 0 0;
+    width: var(--rail-w);
     height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: .5rem;
     padding: .5rem 0;
-    background: #111;
+    background: var(--colorNeutralBackground3, #1f1f1f);
     color: #fff;
     z-index: 1040;
 }
 
+.rail-spacer {
+    flex: 1
+}
+
+/* Plain buttons used in layout */
 .rail-btn {
     width: 40px;
     height: 40px;
-    border: none;
-    border-radius: 8px;
-    background: #222;
+    border: 0;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--rail-btn-bg);
+    cursor: pointer;
     color: #fff;
+    transition: background .15s ease, transform .12s ease;
+}
+
+    .rail-btn:hover {
+        background: var(--rail-btn-bg-hover);
+        transform: translateY(-1px)
+    }
+
+    .rail-btn.rail-danger {
+        background: var(--rail-btn-danger)
+    }
+
+    .rail-btn img {
+        width: 22px;
+        height: 22px;
+        display: block;
+        filter: brightness(0) invert(1);
+        pointer-events: none;
+    }
+
+/* Ensure Bootstrap offcanvas overlays correctly */
+.offcanvas {
+    z-index: 20000 !important;
+    pointer-events: auto !important
+}
+
+.offcanvas-backdrop {
+    z-index: 19900 !important
+}
+
+/* Clickable, clean list items inside offcanvas */
+.offcanvas .list-group-item {
+    background: transparent;
+    border: 0;
     cursor: pointer;
 }
 
-.rail-danger {
-    background: #a00;
+    .offcanvas .list-group-item.list-group-item-action {
+        display: block;
+        padding: .625rem .25rem;
+    }
+
+    .offcanvas .list-group-item:hover {
+        background: rgba(0,0,0,.06);
+    }
+
+/* ============================================================
+   3) TOP BAR
+   ============================================================ */
+.topbar {
+    position: static;
+    top: 0;
+    z-index: 10;
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    align-items: center;
+    height: 72px;
+    padding: 0 16px;
+    background: var(--colorNeutralBackground2, var(--topbar));
+    border-bottom: 1px solid var(--colorNeutralStroke2, #c7c9cc);
+    margin-left: var(--rail-w);
 }
 
-.rail-spacer {
-    flex: 1;
+/* Brand card (div, not a Fluent element) */
+.brand-card {
+    background: var(--brand-card-bg);
+    padding: 6px 10px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    display: inline-flex;
+    align-items: center;
+    height: 64px; /* fits topbar */
+    width: fit-content;
+}
+
+.brand-group {
+    display: flex;
+    align-items: center;
+    gap: 10px
+}
+
+.brand-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain
+}
+
+.brand-vista {
+    color: #000;
+    font-weight: 800;
+    letter-spacing: .6px
+}
+
+.topbar-title {
+    text-align: center;
+    font-weight: 700;
+    font-size: 22px
+}
+
+.topbar-auth {
+    justify-self: end
 }
 
 /* ============================================================
-   4) PAGE LAYOUT
+   4) PAGE LAYOUT WRAPPERS
    ============================================================ */
-.content, .topbar, .footer {
-    margin-left: 56px;
+.content, .topbar {
+    margin-left: var(--rail-w)
 }
 
 .content {
-    padding: 22px;
-}
-
-.dashboard {
-    margin-left: 84px;
+    padding: 22px
 }
 
 .h2 {
     margin: 0 0 16px 8px;
-    font-size: 32px;
+    font-size: 32px
 }
 
+/* Two-column page grid (main + right column) */
 .grid {
     display: grid;
     gap: 22px;
@@ -165,8 +206,15 @@ body {
     align-items: start;
 }
 
+/* Right column stack */
+.right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px
+}
+
 /* ============================================================
-   5) CARDS (Fluent)
+   5) FLUENT CARD BASE
    ============================================================ */
 fluent-card {
     background: var(--card);
@@ -180,7 +228,7 @@ fluent-card {
 }
 
 /* ============================================================
-   6) PROJECT CARD GRID
+   6) PROJECT CARD (header + upload row + slideshow)
    ============================================================ */
 .project-card {
     display: grid;
@@ -192,28 +240,30 @@ fluent-card {
         "show";
 }
 
+/* Header: space between, but we’ll center just the project name block */
 .project-card__header {
     grid-area: header;
-    display: flex;
-    justify-content: center; /* centers the content horizontally */
-    align-items: center; /* centers vertically if needed */
+    display:flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 12px;
-    text-align: center;
+    justify-content:center;
 }
+
+/* Project name badge */
 .project-name-inner {
     background: var(--background-inner);
     padding: 12px 18px;
+    border-radius: 12px;
     font-weight: 700;
     font-size: 1.1rem;
     color: #f1f2f4;
-    border-radius: 12px;
     display: inline-block;
+    max-width: 100%;
+    word-break: break-word;
 }
 
-/* ============================================================
-   7) UPLOAD FORM � NEW RESPONSIVE INLINE ROW
-   ============================================================ */
+/* Upload row (single line that wraps nicely) */
 .upload-row {
     grid-area: form;
     display: flex;
@@ -231,10 +281,11 @@ fluent-card {
         min-width: 220px;
     }
 
+/* Custom file picker UI */
 .file-picker {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 10px
 }
 
 .file-name {
@@ -244,25 +295,25 @@ fluent-card {
     padding: 6px 12px;
     min-width: 150px;
     text-align: center;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,.1);
     font-weight: 500;
 }
 
 .actions {
     display: flex;
-    align-items: center;
+    align-items: center
 }
 
 .action-btn {
     height: 40px;
-    white-space: nowrap;
+    white-space: nowrap
 }
 
 /* ============================================================
-   8) SLIDESHOW
+   7) SLIDESHOW
    ============================================================ */
 .project-card__show {
-    grid-area: show;
+    grid-area: show
 }
 
 .slide-shell {
@@ -275,7 +326,7 @@ fluent-card {
 
 .slide-img {
     width: 100%;
-    height: clamp(360px, 65vh, 820px);
+    height: clamp(360px,65vh,820px);
     object-fit: contain;
     background: #000;
     display: block;
@@ -290,24 +341,25 @@ fluent-card {
     gap: 8px;
     align-items: center;
     padding: 6px 10px;
-    background: rgba(0, 0, 0, .35);
+    background: rgba(0,0,0,.35);
     border-radius: 999px;
     color: #fff;
     backdrop-filter: blur(2px);
 }
 
-/* ============================================================
-   9) RIGHT COLUMN & METRICS
-   ============================================================ */
-.right-col {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.page-chip {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #0008
 }
 
+/* ============================================================
+   8) METRICS (Temperature / Humidity)
+   ============================================================ */
 .metric-inner {
     display: grid;
-    gap: 10px;
+    gap: 10px
 }
 
 .metric-title {
@@ -317,63 +369,180 @@ fluent-card {
     display: inline-block;
     padding: 10px 18px;
     border-radius: 12px;
+    max-width: 420px;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }
 
 .bar {
     height: 22px;
+    max-width: 360px;
     background: #eceef1;
     border-radius: 12px;
     border: 1px solid #c7cad0;
     overflow: hidden;
-    max-width: 360px;
 }
 
     .bar .bar-fill {
         height: 100%;
-        background: var(--ok);
+        background: var(--ok)
     }
 
     .bar.bar-danger .bar-fill {
-        background: var(--danger);
+        background: var(--danger)
     }
 
 /* ============================================================
-   10) FOOTER
+   9) CHIPS (legacy chip, if still used elsewhere)
+   ============================================================ */
+.chip {
+    display: inline-block;
+    background: var(--background-inner);
+    color: #e8eaee;
+    padding: 10px 16px;
+    border-radius: 14px;
+    font-weight: 700;
+    text-align: center;
+    min-width: 260px;
+    font-size: 18px;
+}
+
+/* ============================================================
+   10) GLASS TEXTAREA (Announcements input)
+   ============================================================ */
+.glass-textarea {
+    background: rgba(0,0,0,.35);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    width: 100%;
+    resize: vertical;
+    font-size: 1rem;
+    backdrop-filter: blur(2px);
+    caret-color: #fff;
+}
+
+    .glass-textarea::placeholder {
+        color: rgba(255,255,255,.85)
+    }
+
+/* Announcement display card */
+.announcement-card {
+    background: var(--background-inner);
+    padding: 12px 18px;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 500;
+    max-width: 500px;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    box-sizing: border-box;
+}
+
+/* ============================================================
+   11) FOOTER
    ============================================================ */
 .footer {
-    position:fixed;
-    bottom: 0;
-    right: 0;
-    background: #f5f5f5;
+    position: static;
+    display: inline-flex;
+    justify-content: flex-end; /* push content to the right */
+    margin-left: 1475px;
     padding: 0.5rem 1rem;
-    border-top-left-radius: 8px;
-    box-shadow: -2px -2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px 8px 8px 8px;
 }
+
 
 /* ============================================================
-   11) RESPONSIVE BREAKPOINTS
+   12) RESPONSIVE BREAKPOINTS
    ============================================================ */
-@media (max-width: 1200px) {
+@media (max-width:1200px) {
     .upload-row {
         flex-wrap: wrap;
-        justify-content: flex-start;
+        justify-content: flex-start
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width:900px) {
     .grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width:700px) {
     .slide-controls {
         right: 8px;
         bottom: 8px;
-        padding: 6px 8px;
+        padding: 6px 8px
     }
 
     .slide-img {
-        height: clamp(260px, 52vh, 620px);
+        height: clamp(260px,52vh,620px)
     }
 }
+/* ============================================================
+   FLUENT SIDEBAR ICON BUTTONS (Red Style)
+   ============================================================ */
+/* Sidebar icon buttons — make them solid red, square(ish), icon-only */
+.icon-btn {
+    padding: 0; /* host */
+    display: inline-grid;
+    place-items: center;
+}
+
+    /* style the real button surface inside fluent-button */
+    .icon-btn::part(control) {
+        width: 40px;
+        height: 40px;
+        min-width: 40px; /* prevent the wide pill */
+        padding: 0; /* remove default horizontal padding */
+        border: 0;
+        border-radius: 12px;
+        background: #8a1f11; /* your red */
+        box-shadow: 0 2px 6px rgba(0,0,0,.25);
+        transition: transform .15s ease, background .15s ease;
+    }
+
+    .icon-btn:hover::part(control) {
+        background: #a32318;
+        transform: translateY(-1px);
+    }
+
+    .icon-btn:active::part(control) {
+        background: #6e160e;
+        transform: none;
+    }
+
+    /* center the icon and keep it white */
+    .icon-btn::part(content) {
+        display: grid;
+        place-items: center;
+        padding: 0; /* no extra space around the icon */
+    }
+
+    .icon-btn img {
+        width: 22px;
+        height: 22px;
+        filter: brightness(0) invert(1); /* white icons */
+        pointer-events: none;
+    }
+
+/* ============================================================
+   Annoucnement header (name + date)
+   ============================================================ */
+.announcement-header {
+    display: flex;
+    justify-content: space-between; /* pushes name left, date right */
+    align-items: center;
+    width: 100%;
+}
+
+.announcement-date {
+    font-size: 0.9rem;
+    color: #ccc; /* optional lighter tone for subtle date text */
+}
+
+
+

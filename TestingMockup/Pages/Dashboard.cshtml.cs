@@ -34,6 +34,7 @@ public class DashboardModel : PageModel
     public List<string> SlideUrls { get; set; } = new();     // images for the slideshow
     public string? LatestSetId { get; set; }                 // shown set (folder name)
     public string PageMessage { get; set; } = "";
+    [BindProperty] public string? Announcement { get; set; }
 
     // Upload form fields
     [BindProperty]
@@ -59,6 +60,12 @@ public class DashboardModel : PageModel
 
         if (TempData.ContainsKey("Announcement"))
             LatestAnnouncement = TempData["Announcement"]?.ToString();
+    }
+    public IActionResult OnPost()
+    {
+        // TODO: save, e.g., TempData + redirect back to Dashboard
+        TempData["Announcement"] = Announcement;
+        return RedirectToPage("/Dashboard");
     }
 
     // Upload PDF to a specific project (existing or new). Creates a new "set" timestamp folder.

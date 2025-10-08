@@ -138,18 +138,41 @@
             <fluent-card hx-get="/Dashboard/AnnouncementsPartial" hx-trigger="load" hx-swap="innerHTML" style="position:relative;">
                 <div>
                     <h3 style="margin-top:0;">Announcement Board</h3>
-                    @if (User?.Identity?.IsAuthenticated ?? false)
-                    {
-                        <form method="get" asp-page="/Edit-Add-Announcement" style="position:absolute; top:10px; right:10px;">
-                            <fluent-button appearance="secondary" size="small" type="submit">Edit/Add</fluent-button>
-                        </form>
-                    }
                     @if (Model.LatestAnnouncement != null)
                     {
-                        <div style="margin-top:10px; text-align:left;">
-                            <strong>@User.Identity.Name</strong>
+                     
+                        var isAuth = User?.Identity?.IsAuthenticated == true;
+                        var fullName = isAuth
+                        ? (User.FindFirst("given_name")?.Value
+                        ?? User.FindFirst("name")?.Value
+                        ?? User.Identity?.Name)
+                        : null;
+
+                        <div class="announcement-card" style="margin-top:10px; text-align:left;">
+                            <div class="announcement-header">
+                                <strong>@fullName:</strong>
+                                <span class="announcement-date">@DateTime.Now</span>
+                            </div>
                             <p style="margin:6px 0 0 0;">@Model.LatestAnnouncement</p>
                         </div>
+
+                    }
+                    @if (User?.Identity?.IsAuthenticated ?? false)
+                    {
+                        <form method="post">
+                            <div class="mb-3">
+                                <label for="Announcement" class="form-label">Announcement</label>
+                                <textarea id="Announcement"
+                                      name="Announcement"
+                                      rows="1"
+                                      class="glass-textarea"
+                                      placeholder="Type here..."></textarea>
+
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <a asp-page="/Dashboard" class="btn btn-secondary">Cancel</a>
+                        </form>
+
                     }
                 </div>
             </fluent-card>
