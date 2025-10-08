@@ -148,13 +148,17 @@
                         ?? User.Identity?.Name)
                         : null;
 
-                        <div class="announcement-card" style="margin-top:10px; text-align:left;">
-                            <div class="announcement-header">
-                                <strong>@fullName:</strong>
-                                <span class="announcement-date">@DateTime.Now</span>
+                        <div class="announcement-scroll">
+                            <!-- repeat for each message -->
+                            <div class="announcement-card">
+                                <div class="announcement-header">
+                                    <strong>@fullName</strong>
+                                    <span class="announcement-date">@DateTime.Now</span>
+                                </div>
+                                <p>@Model.LatestAnnouncement</p>
                             </div>
-                            <p style="margin:6px 0 0 0;">@Model.LatestAnnouncement</p>
                         </div>
+
 
                     }
                     @if (User?.Identity?.IsAuthenticated ?? false)
