@@ -319,17 +319,26 @@ fluent-card {
 .slide-shell {
     position: relative;
     background: #000;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow);
+    width: 100%;
+    min-height: 60vh; /* normal view height */
+    margin: 0;
+    padding: 0;
 }
 
+    .slide-shell:fullscreen { /* when in fullscreen */
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+    }
+
+/* The slide image should scale to the shell */
 .slide-img {
-    width: 100%;
-    height: clamp(360px,65vh,820px);
-    object-fit: contain;
-    background: #000;
     display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* keep aspect ratio; no cropping */
+    background: #000; /* letterbox bars look clean */
+    margin: 0;
 }
 
 .slide-controls {
@@ -559,6 +568,18 @@ fluent-card {
         background: rgba(255,255,255,.35);
         border-radius: 6px;
     }
+
+/* ============================================================
+   File name label (for upload file name display)
+   ============================================================ */
+.file-label {
+    display: inline-block;
+    max-width: 200px; /* adjust width */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
 
 
 

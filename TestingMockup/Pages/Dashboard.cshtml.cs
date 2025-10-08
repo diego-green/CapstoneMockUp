@@ -63,9 +63,13 @@ public class DashboardModel : PageModel
     }
     public IActionResult OnPost()
     {
-        // TODO: save, e.g., TempData + redirect back to Dashboard
-        TempData["Announcement"] = Announcement;
-        return RedirectToPage("/Dashboard");
+  // If the binder somehow missed it, try to recover from the form
+    if (string.IsNullOrWhiteSpace(ProjectId))
+        ProjectId = Request.Form["ProjectId"];
+
+    TempData["Announcement"] = Announcement;
+    TempData["ProjectId"] = ProjectId; // safety net
+    return RedirectToPage("/Dashboard", new { ProjectId });
     }
 
     // Upload PDF to a specific project (existing or new). Creates a new "set" timestamp folder.
@@ -82,7 +86,7 @@ public class DashboardModel : PageModel
         {
             ModelState.AddModelError(string.Empty, "No file selected.");
             LoadLatestSlidesForProject(targetProject);
-            return Page();
+            return RedirectToPage(null, new { ProjectId });
         }
 
         var ext = Path.GetExtension(pdfFile.FileName).ToLowerInvariant();
@@ -90,14 +94,14 @@ public class DashboardModel : PageModel
         {
             ModelState.AddModelError(string.Empty, "Please upload a .pdf file.");
             LoadLatestSlidesForProject(targetProject);
-            return Page();
+            return RedirectToPage(null, new { ProjectId });
         }
 
         if (pdfFile.Length > 100 * 1024 * 1024)
         {
             ModelState.AddModelError(string.Empty, "File too large (max 100 MB).");
             LoadLatestSlidesForProject(targetProject);
-            return Page();
+            return RedirectToPage(null, new { ProjectId });
         }
 
         try

@@ -10,6 +10,9 @@
           asp-route-returnUrl="@here"
           method="get"
           class="auth-form">
+        <img src="@Url.Content("~/Images/Honeywell-icon.png")"
+             alt="Honeywell"
+             style="height:24px;width:auto;vertical-align:middle;" />
         <span>
             Hello,
             @(
@@ -18,11 +21,18 @@
                     ?? User.Identity?.Name
                     )!
     </span>
-    <button type="submit" class="btn-link">Sign out</button>
+    <fluent-button type="submit" appearance="neutral" style="padding:6px 16px; border-radius:8px;">
+        <img slot="start" src="~/icons/ic_fluent_arrow_exit_24_filled.svg"
+             alt="Sign out icon" style="width:18px; height:18px;" />
+        Sign&nbsp;out
+    </fluent-button>
 </form>
 }
 else
 {
+    <img src="@Url.Content("~/Images/Honeywell-icon.png")"
+         alt="Honeywell"
+         style="height:24px;width:auto;vertical-align:middle;" />
     <a asp-page="/Account/SignIn"
        asp-route-returnUrl="@here"
        class="btn-link">Sign in</a>

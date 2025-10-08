@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authentication;
 
-namespace TestingMockup.Pages.Account   // <-- same here
+namespace TestingMockup.Pages.Account   
 {
     public class SignOutModel : PageModel
     {

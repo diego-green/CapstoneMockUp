@@ -39,6 +39,7 @@
             @if (User?.Identity?.IsAuthenticated ?? false)
             {
                 <form method="post" enctype="multipart/form-data" asp-page-handler="UploadPdf" class="upload-row">
+                    <input type="hidden" name="ProjectId" value="@Model.ProjectId" />
                     <div class="field">
                         <label class="form-label">Upload PDF to project</label>
                         <fluent-select name="projectId">
@@ -65,7 +66,7 @@
                         <label class="form-label">PDF file selector</label>
                         <div class="file-picker">
                             <fluent-button appearance="accent" type="button" onclick="document.getElementById('pdfFile').click()">Select PDF</fluent-button>
-                            <span id="fileName" class="file-name">No file selected</span>
+                            <span id="fileName" class="file-label">No file selected</span>
                             <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required hidden
                                    onchange="document.getElementById('fileName').textContent = this.files.length ? this.files[0].name : 'No file selected';">
                         </div>
@@ -119,7 +120,14 @@
                       playPauseBtn.addEventListener("click",()=>{ playing=!playing; playPauseBtn.textContent=playing?"Pause":"Play"; if(playing) start(); else stop(); });
                       intervalInput.addEventListener("change",()=>{ if(playing) start(); });
 
-                      fullscreenBtn.addEventListener("click",()=>{ if(!document.fullscreenElement) shell.requestFullscreen?.(); else document.exitFullscreen?.(); });
+                                          fullscreenBtn.addEventListener("click", () => {
+                      if (!document.fullscreenElement) {
+                        shell.requestFullscreen?.().then(() => shell.classList.add("is-fullscreen"));
+                      } else {
+                        document.exitFullscreen?.().then(() => shell.classList.remove("is-fullscreen"));
+                      }
+                    });
+
 
                       show(0); start();
                     })();
@@ -164,18 +172,22 @@
                     @if (User?.Identity?.IsAuthenticated ?? false)
                     {
                         <form method="post">
+                            <input asp-for="ProjectId" type="hidden" />
                             <div class="mb-3">
                                 <label for="Announcement" class="form-label">Announcement</label>
-                                <textarea id="Announcement"
-                                      name="Announcement"
-                                      rows="1"
-                                      class="glass-textarea"
-                                      placeholder="Type here..."></textarea>
-
+                                <textarea asp-for="Announcement"
+                                          id="Announcement"
+                                          rows="1"
+                                          class="glass-textarea"
+                                          placeholder="Type here..."></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Save</button>
-                            <a asp-page="/Dashboard" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary"
+                                    formaction="/Dashboard?ProjectId=@Model.ProjectId">
+                                Save
+                            </button>
+                            <a asp-page="/Dashboard" asp-route-ProjectId="@Model.ProjectId" class="btn btn-secondary">Cancel</a>
                         </form>
+
 
                     }
                 </div>
