@@ -2,7 +2,76 @@
 @model EngineerModel
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @{
-    ViewData["Title"] = "Engineer View";
+    ViewData["Title"] = "Engineer Dashboard";
 }
-<h1>Engineer View</h1>
-<p>Here goes the engineer-specific dashboard/content.</p>
+
+<h2 class="h2 mb-4">Weekly Temperature Overview</h2>
+
+<!-- Chart container -->
+<div class="card p-4" style="max-width: 800px;">
+    <canvas id="weeklyTempChart" width="700" height="350"></canvas>
+</div>
+
+@section Scripts {
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // ✅ Dummy data for now (you can replace with your DB data later)
+        const weeklyData = [
+            { day: 'Mon', avgTemp: 24.3 },
+            { day: 'Tue', avgTemp: 25.1 },
+            { day: 'Wed', avgTemp: 26.4 },
+            { day: 'Thu', avgTemp: 24.8 },
+            { day: 'Fri', avgTemp: 27.0 },
+            { day: 'Sat', avgTemp: 28.2 },
+            { day: 'Sun', avgTemp: 26.7 }
+        ];
+
+        // Extract labels and values
+        const labels = weeklyData.map(d => d.day);
+        const temps = weeklyData.map(d => d.avgTemp);
+
+        // Create Chart
+        new Chart(document.getElementById('weeklyTempChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Average Temperature (°C)',
+                    data: temps,
+                    backgroundColor: 'rgba(138, 31, 17, 0.6)', // Honeywell accent red
+                    borderColor: 'rgba(138, 31, 17, 1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Temperature (°C)' }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Average Temperature Per Day (Dummy Data)',
+                        font: { size: 18 }
+                    },
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#232528',
+                        titleColor: '#fff',
+                        bodyColor: '#fff'
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+}
+
