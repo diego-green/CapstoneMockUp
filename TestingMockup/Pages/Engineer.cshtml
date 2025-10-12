@@ -5,73 +5,154 @@
     ViewData["Title"] = "Engineer Dashboard";
 }
 
-<h2 class="h2 mb-4">Weekly Temperature Overview</h2>
+<main class="dashboard">
+    <h2 class="h2">Engineer Dashboard</h2>
 
-<!-- Chart container -->
-<div class="card p-4" style="max-width: 800px;">
-    <canvas id="weeklyTempChart" width="700" height="350"></canvas>
-</div>
+    <section class="engineer-grid">
+        <!-- Left col row 1 -->
+        <fluent-card class="topic-card card-sprint">
+            <div class="pill-title">Sprint Progress</div>
+            <div class="bar"><div class="bar-fill" style="width:85%"></div></div>
+        </fluent-card>
+
+        <!-- Right col rows 1-2 (spans two rows) -->
+        <fluent-card class="topic-card card-temp">
+            <div class="card-title">Temperature Stats</div>
+
+            <div class="mini-metrics">
+                <div class="mini">
+                    <div class="metric-title">T: <span id="metricTemp">--</span>°C</div>
+                    <div class="bar"><div id="tempFill" class="bar-fill" style="width:0%"></div></div>
+                </div>
+                <div class="mini">
+                    <div class="metric-title">RH: <span id="metricRh">--</span>%</div>
+                    <div class="bar bar-danger"><div id="rhFill" class="bar-fill" style="width:0%"></div></div>
+                </div>
+            </div>
+
+            <div class="charts-2col">
+                <div class="chart-wrap">
+                    <div class="subtle-title">Rolling Average</div>
+                    <canvas id="rollingAvgChart"></canvas>
+                </div>
+                <div class="chart-wrap">
+                    <div class="subtle-title">Bar Chart</div>
+                    <canvas id="weeklyBarChart"></canvas>
+                </div>
+            </div>
+        </fluent-card>
+
+        <!-- Left col row 2 -->
+        <fluent-card class="topic-card card-tasks">
+            <div class="card-title">My Priorities (Tasks this Sprint)</div>
+            <div class="scroll-col">
+                <div class="announcement-card">
+                    <strong>TASK-307: Add HTMX partial for alerts</strong><br />
+                    <a href="#">Link to Jira</a>
+                </div>
+                <div class="announcement-card">
+                    <strong>TASK-314: Unit tests for CSV parser</strong><br />
+                    <a href="#">Link to Jira</a>
+                </div>
+                <div class="announcement-card">
+                    <strong>TASK-330: Fluent card polish</strong><br />
+                    <a href="#">Link to Jira</a>
+                </div>
+            </div>
+        </fluent-card>
+
+        <!-- Left col row 3 -->
+        <fluent-card class="topic-card card-epics">
+            <div class="card-title">Epics</div>
+            <div class="scroll-col">
+                <div class="announcement-card">
+                    <strong>EPIC-42: Sensor Ingestion v2</strong><br />% Completed: 64%
+                </div>
+                <div class="announcement-card">
+                    <strong>EPIC-51: Engineer View UX</strong><br />% Completed: 38%
+                </div>
+            </div>
+        </fluent-card>
+
+        <!-- Left col row 4: issues (two cards side-by-side) -->
+        <div class="issues-row">
+            <fluent-card class="topic-card">
+                <div class="card-title">Issues I’m Blocking</div>
+                <div class="scroll-col">
+                    <div class="announcement-card">
+                        <strong>TASK-410: DB Migration step</strong><br /><a href="#">Link to Jira</a>
+                    </div>
+                    <div class="announcement-card">
+                        <strong>TASK-412: Secrets rotation</strong><br /><a href="#">Link to Jira</a>
+                    </div>
+                </div>
+            </fluent-card>
+
+            <fluent-card class="topic-card">
+                <div class="card-title">Issues Blocking Me</div>
+                <div class="scroll-col">
+                    <div class="announcement-card">
+                        <strong>TASK-399: AD group mapping pending</strong><br /><a href="#">Link to Jira</a>
+                    </div>
+                    <div class="announcement-card">
+                        <strong>TASK-401: Sensor CSV path change</strong><br /><a href="#">Link to Jira</a>
+                    </div>
+                </div>
+            </fluent-card>
+        </div>
+
+        <!-- Right col row 3-4 (below Temperature) -->
+        <fluent-card class="topic-card card-mentions">
+            <div class="card-title">My Mentions</div>
+            <div class="scroll-col">
+                <div class="announcement-card">
+                    <strong>TASK-221</strong><br />Alexander mentioned you in TASK-221 — <a href="#">open</a>
+                </div>
+                <div class="announcement-card">
+                    <strong>TASK-314</strong><br />Jason mentioned you in TASK-314 — <a href="#">open</a>
+                </div>
+                <div class="announcement-card">
+                    <strong>EPIC-42</strong><br />Ricardo mentioned you in EPIC-42 — <a href="#">open</a>
+                </div>
+            </div>
+        </fluent-card>
+    </section>
+
+</main>
 
 @section Scripts {
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
-        // ✅ Dummy data for now (you can replace with your DB data later)
-        const weeklyData = [
-            { day: 'Mon', avgTemp: 24.3 },
-            { day: 'Tue', avgTemp: 25.1 },
-            { day: 'Wed', avgTemp: 26.4 },
-            { day: 'Thu', avgTemp: 24.8 },
-            { day: 'Fri', avgTemp: 27.0 },
-            { day: 'Sat', avgTemp: 28.2 },
-            { day: 'Sun', avgTemp: 26.7 }
-        ];
+        // Dummy weekly telemetry
+        const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        const temps = [22.1, 23.4, 24.2, 23.0, 25.3, 26.1, 24.7];
+        const humidity = [58, 60, 62, 59, 57, 63, 61];
 
-        // Extract labels and values
-        const labels = weeklyData.map(d => d.day);
-        const temps = weeklyData.map(d => d.avgTemp);
+        // mini metrics
+        document.getElementById('metricTemp').textContent = temps.at(-1).toFixed(0);
+        document.getElementById('tempFill').style.width = Math.min(100, (temps.at(-1)/40)*100).toFixed(0) + '%';
+        document.getElementById('metricRh').textContent = humidity.at(-1);
+        document.getElementById('rhFill').style.width = humidity.at(-1) + '%';
 
-        // Create Chart
-        new Chart(document.getElementById('weeklyTempChart'), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Average Temperature (°C)',
-                    data: temps,
-                    backgroundColor: 'rgba(138, 31, 17, 0.6)', // Honeywell accent red
-                    borderColor: 'rgba(138, 31, 17, 1)',
-                    borderWidth: 1,
-                    borderRadius: 6,
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Temperature (°C)' }
-                    }
-                },
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Average Temperature Per Day (Dummy Data)',
-                        font: { size: 18 }
-                    },
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#232528',
-                        titleColor: '#fff',
-                        bodyColor: '#fff'
-                    }
-                },
-                responsive: true,
-                maintainAspectRatio: false
-            }
+        // rolling avg helper
+        function rollingAvg(a,w){const o=[];for(let i=0;i<a.length;i++){const s=Math.max(0,i-w+1);const sl=a.slice(s,i+1);o.push(+(sl.reduce((x,y)=>x+y,0)/sl.length).toFixed(2));}return o;}
+        const roll3 = rollingAvg(temps,3);
+
+        const gridColor='rgba(255,255,255,.18)', axisColor='#e6e6e6';
+
+        new Chart(document.getElementById('rollingAvgChart'),{
+            type:'line',
+            data:{labels:days,datasets:[
+                {label:'Temp (°C)',data:temps,borderWidth:2,tension:.3,pointRadius:2,borderColor:'rgba(255,255,255,.85)',backgroundColor:'rgba(255,255,255,.15)',fill:false},
+                {label:'3-day Rolling Avg',data:roll3,borderWidth:3,tension:.35,pointRadius:0,borderColor:'rgba(138,31,17,1)',backgroundColor:'rgba(138,31,17,0.1)',fill:false}
+            ]},
+            options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{color:axisColor}},y:{beginAtZero:false,suggestedMin:18,suggestedMax:30,grid:{color:gridColor},ticks:{color:axisColor}}}}
+        });
+
+        new Chart(document.getElementById('weeklyBarChart'),{
+            type:'bar',
+            data:{labels:days,datasets:[{label:'Avg Temp (°C)',data:temps.map(t=>+t.toFixed(1)),borderWidth:1,borderRadius:6,backgroundColor:'rgba(138,31,17,.6)',borderColor:'rgba(138,31,17,1)'}]},
+            options:{plugins:{legend:{display:false}},scales:{x:{grid:{color:gridColor},ticks:{color:axisColor}},y:{beginAtZero:true,suggestedMax:30,grid:{color:gridColor},ticks:{color:axisColor}}}}
         });
     </script>
 }
-
